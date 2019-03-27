@@ -1,14 +1,11 @@
 FROM alpine:latest
 
-ADD https://storage.googleapis.com/kubernetes-release/release/v1.11.1/bin/linux/amd64/kubectl /usr/local/bin/kubectl
-ADD https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.3.0/heptio-authenticator-aws_0.3.0_linux_amd64 /usr/local/bin/aws-iam-authenticator
-ADD kubectl.sh /usr/local/bin/kubectl.sh
-
+ADD https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/kubectl /usr/local/bin/kubectl
+ADD https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
 RUN set -x && \
     \
     apk add --update --no-cache curl ca-certificates python py-pip jq && \
     chmod +x /usr/local/bin/kubectl && \
-    chmod +x /usr/local/bin/kubectl.sh && \
     chmod +x /usr/local/bin/aws-iam-authenticator && \
     \
     # Create non-root user (with a randomly chosen UID/GUI).
@@ -20,4 +17,5 @@ RUN set -x && \
     aws --version && kubectl version --client
 
 USER kubectl
-ENTRYPOINT [ "/usr/local/bin/kubectl.sh" ]
+CMD aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $CLUSTER && kubectl get svc
+ENTRYPOINT []
